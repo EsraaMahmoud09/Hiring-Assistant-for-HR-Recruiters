@@ -1,0 +1,720 @@
+{
+  "name": "Job Application Flexible JD",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Job Application Form",
+        "formDescription": "Please fill in the following details and upload your CV",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Please Enter your Full Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Please Enter Email Address",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Upload CV",
+              "fieldType": "file",
+              "acceptFileTypes": "e.g. pdf , word",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Job Title",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Data Analyst"
+                  },
+                  {
+                    "option": "BI Developer"
+                  },
+                  {
+                    "option": "Data Engineer"
+                  },
+                  {
+                    "option": "Data Science"
+                  },
+                  {
+                    "option": "AI Engineer"
+                  },
+                  {
+                    "option": "Frontend Developer"
+                  },
+                  {
+                    "option": "Frontend Developer"
+                  }
+                ]
+              },
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -2032,
+        336
+      ],
+      "id": "f69f0483-62da-4afb-8ed4-bde11a12c0d0",
+      "name": "On form submission",
+      "webhookId": "c54a1cb7-6c58-4afb-b4a3-180fb23347eb"
+    },
+    {
+      "parameters": {
+        "tableId": "User_job_applications",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "fname",
+              "fieldValue": "={{ $('On form submission').item.json['Please Enter your Full Name'] }}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{ $('On form submission').item.json['Please Enter Email Address'] }}"
+            },
+            {
+              "fieldId": "skills",
+              "fieldValue": "={{ $json.skills }}"
+            },
+            {
+              "fieldId": "experience",
+              "fieldValue": "={{ $json.experience }}"
+            },
+            {
+              "fieldId": "education",
+              "fieldValue": "={{ $json.education }}"
+            },
+            {
+              "fieldId": "project",
+              "fieldValue": "={{ $json.project }}"
+            },
+            {
+              "fieldId": "course",
+              "fieldValue": "={{ $json.courses }}"
+            },
+            {
+              "fieldId": "score",
+              "fieldValue": "={{ $json.score }}"
+            },
+            {
+              "fieldId": "summary",
+              "fieldValue": "={{ $json.summary }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "Pending"
+            },
+            {
+              "fieldId": "language",
+              "fieldValue": "={{ $json.language }}"
+            },
+            {
+              "fieldId": "links",
+              "fieldValue": "={{ $json.links }}"
+            },
+            {
+              "fieldId": "job_id",
+              "fieldValue": "={{ $('Get a row').item.json.job_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -848,
+        336
+      ],
+      "id": "da6edd43-4cbe-4731-ac40-95862ffe2f55",
+      "name": "Create a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "34JHdg2FZ6FlKbW7",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "Upload_CV",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1696,
+        336
+      ],
+      "id": "4f940dbe-8d70-4dec-9d0d-193a44a0528e",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert HR recruiter and data parser. Read the following raw CV text carefully.\n\nHere is the Job Description / Requirements we are looking for:\n{{ $('Get a row').first().json.job_requirements }}\n\nPlease evaluate the CV against these requirements and output the result strictly in valid JSON format with the following keys:\n- \"fname\": Full Name\n- \"email\": Email address\n- \"skills\": All technical and soft skills extracted as a clean list\n- \"experience\": Professional work history\n- \"education\": Degrees and university details\n- \"project\": Notable projects\n- \"courses\": Training courses or certifications\n- \"score\": A numeric score from 0 to 100 based on how well the candidate matches the Job Description requirements\n- \"summary\": A brief executive summary explaining the evaluation and why this score was given\n- \"links\": \"Extract all URLs, portfolio links, GitHub, or LinkedIn links found anywhere in the text. Return them as a comma-separated string. If absolutely no URLs are found, return 'No professional links provided'.\n- \"language\": \"Extract all spoken or written languages mentioned in the CV. If none are explicitly written, look at the primary language of the CV text itself (e.g., if the CV is written in English, write 'English') or return 'Not specified' - NEVER return null.\n\nCV Text:\n{{ $('Extract from File').item.json.text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1312,
+        336
+      ],
+      "id": "12838818-7aeb-4b09-b9e7-626d3767e0b6",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "command-r-plus-08-2024",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatCohere",
+      "typeVersion": 1,
+      "position": [
+        -1472,
+        560
+      ],
+      "id": "cfd55a7e-3ad6-4a6f-b2c3-5fca7fcfab6c",
+      "name": "Cohere Chat Model",
+      "credentials": {
+        "cohereApi": {
+          "id": "xlBMV6Hs5I78nlvU",
+          "name": "Cohere account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the output text from the AI Agent node\nconst aiText = $input.item.json.output;\n\nlet parsedData = {};\ntry {\n  // Try to parse the text directly into a valid JSON object\n  parsedData = JSON.parse(aiText);\n} catch (e) {\n  // If the text contains markdown formatting or extra text, extract the JSON block using regex\n  const jsonMatch = aiText.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) {\n    parsedData = JSON.parse(jsonMatch[0]);\n  }\n}\n\n// Return the parsed data structured so Supabase can map each key to its separate column\nreturn [{ json: parsedData }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1056,
+        336
+      ],
+      "id": "83e0e417-2738-494f-80f1-97701e743824",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.score }}",
+                    "rightValue": 70,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    },
+                    "id": "be6c9ada-b5e8-4550-81db-997f2044766e"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "HR Notification"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "0833af77-86e5-4ddf-bac1-0e8ecd29fea3",
+                    "leftValue": "={{ $json.score }}",
+                    "rightValue": 70,
+                    "operator": {
+                      "type": "number",
+                      "operation": "lt"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Rejection Email"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -624,
+        336
+      ],
+      "id": "94d3571e-244f-4f4f-81d3-12e2d1e2b7ef",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json['Please Enter Email Address'] }}",
+        "subject": "Update on Your Application for the Data Analyst Position",
+        "emailType": "text",
+        "message": "=Dear {{ $('On form submission').item.json['Please Enter your Full Name'] }},  Thank you for taking the time to apply for the Data Analyst position and for sharing your background and CV with us.   We appreciate the effort you put into your application. However, after careful review by our recruitment team, we regret to inform you that we will not be moving forward with your candidacy at this time. We are looking for candidates whose profiles more closely align with our current technical requirements for this role.  We truly appreciate your interest in joining our team and wish you the very best in your professional career and future job endeavors.  Sincerely,  Recruitment Team",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -384,
+        448
+      ],
+      "id": "4bdb8e07-dddd-4aa2-872d-2912bb0c6aa4",
+      "name": "Send a message",
+      "webhookId": "a99cc042-fe42-4ce0-9e7f-300b714f1d36",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "dazX09Apqjgsm8Y4",
+          "name": "Gmail account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json['Please Enter Email Address'] }}",
+        "subject": "Update Regarding Your Application for the Data Analyst Position",
+        "emailType": "text",
+        "message": "=Dear {{ $('On form submission').item.json['Please Enter your Full Name'] }} ,  Thank you once again for your application and for sharing your qualifications with our recruitment team. We truly appreciate the time and effort you invested in applying for the Data Analyst role.  Following a thorough review of applications in this second stage, we regret to inform you that we will not be moving forward with your candidacy at this time. Our team received a high volume of strong applications, and we had to make difficult decisions based on specific project requirements.  We are grateful for your interest in joining us and wish you continued success in your professional career and upcoming opportunities.  Sincerely, Recruitment Team",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        160,
+        288
+      ],
+      "id": "fe73600e-e6f5-4515-8338-f3d96a9aa57c",
+      "name": "Send a message2",
+      "webhookId": "f18d0622-e1dd-46aa-8ba4-19b3e062bf70",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "dazX09Apqjgsm8Y4",
+          "name": "Gmail account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "sendTo": "esraashawky09@gmail.com",
+        "subject": "New Qualified Candidate",
+        "message": "=New Candidate Application Received\nName: {{ $('On form submission').item.json['Please Enter your Full Name'] }}\n\nEmail: {{ $('On form submission').item.json['Please Enter Email Address'] }}\n\nScore: {{ $('Code in JavaScript').item.json.score }} / 100\n\nProfessional Links:\n{{ $('Code in JavaScript1').item.json.links }}\n\nAI Summary:\n{{ $('Code in JavaScript').item.json.summary }}\n\n\n\n\n{{ $('On form submission').item.json['Please Enter your Full Name'] }}",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "disapproveLabel": "Reject"
+          }
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -32,
+        208
+      ],
+      "id": "b237dcb6-2efa-4d19-91fc-8add678586cd",
+      "name": "Send message and wait for response1",
+      "webhookId": "c508739a-4760-4d64-be1e-65f92a7119b3",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "dazX09Apqjgsm8Y4",
+          "name": "Gmail account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get candidate data from the previous node\nconst candidate = $input.item.json;\n\nlet linksHtml = \"No professional links provided\";\n\nif (candidate.links) {\n    if (Array.isArray(candidate.links)) {\n        linksHtml = candidate.links.join(' , ');\n    } else {\n        linksHtml = candidate.links;\n    }\n}\n\nreturn {\n    json: {\n        ...candidate,\n        linksHtml: linksHtml\n    }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        208
+      ],
+      "id": "c089357f-1b31-40a0-b0bd-d51a1a4ecf65",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "User_job_applications",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "email",
+              "condition": "eq",
+              "keyValue": "={{ $('On form submission').item.json['Please Enter Email Address'] }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "Rejected"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        304,
+        288
+      ],
+      "id": "2a0d7713-20d7-4128-8f34-eea9d8dcaed7",
+      "name": "Update a row1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "34JHdg2FZ6FlKbW7",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "User_job_applications",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "email",
+              "condition": "eq",
+              "keyValue": "={{ $('On form submission').item.json['Please Enter Email Address'] }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "Rejected"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        448
+      ],
+      "id": "2034283b-1fd6-45f5-8dea-5178d314319b",
+      "name": "Update a row2",
+      "credentials": {
+        "supabaseApi": {
+          "id": "34JHdg2FZ6FlKbW7",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json['Please Enter Email Address'] }}",
+        "subject": "=Invitation to Interview - {{ $('On form submission').item.json['Job Title'] }} Position",
+        "message": "=Dear {{ $('On form submission').item.json['Please Enter your Full Name'] }} ,  Thank you for your application for the Data Analyst position. We were thoroughly impressed by your background, technical skills, and portfolio projects.  We are pleased to invite you to an in-person (physical) interview at our office on Monday at 12:00 PM. This meeting will be an excellent opportunity to discuss your professional experience in detail and explore how your skills align with our team's objectives.  Please confirm your attendance by replying to this email at your earliest convenience.   We look forward to meeting you in person.  Best regards,  HR Team",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        160,
+        112
+      ],
+      "id": "a64035fb-1d49-4096-85b8-c0874517be13",
+      "name": "Send a message1",
+      "webhookId": "7476186d-4cb7-41f1-b11e-f1dae3b6e9d4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "dazX09Apqjgsm8Y4",
+          "name": "Gmail account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const buffer = await this.helpers.getBinaryDataBuffer(0, 'Upload_CV');\nconst pdfRaw = buffer.toString('latin1');\n\nconst uriRegex = /\\/URI\\s*\\(([^)]+)\\)/g;\nconst linksSet = new Set();\nlet match;\n\nwhile ((match = uriRegex.exec(pdfRaw)) !== null) {\n  const url = match[1]\n    .replace(/\\\\\\(/g, '(')\n    .replace(/\\\\\\)/g, ')')\n    .replace(/\\\\\\\\/g, '\\\\')\n    .trim();\n  if (url) linksSet.add(url);\n}\n\nreturn [{\n  json: {\n    ...$json,\n    detectedLinks: linksSet.size\n      ? Array.from(linksSet).join(', ')\n      : 'No professional links provided'\n  },\n  binary: $input.item.binary\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1872,
+        336
+      ],
+      "id": "43e78471-6de9-4f3a-b17a-237cbfb947fe",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "job_requirements",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "title",
+              "keyValue": "={{ $('On form submission').item.json['Job Title'] }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -1520,
+        336
+      ],
+      "id": "d7001a78-8493-4a73-bf50-f60f22bc9b77",
+      "name": "Get a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "34JHdg2FZ6FlKbW7",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "team": "9012915840",
+        "space": "90123754864",
+        "folder": "90125702028",
+        "list": "901209629402",
+        "name": "job_application",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        208
+      ],
+      "id": "91593454-1c8a-46eb-86f5-994c6a2d9c3e",
+      "name": "Create a task",
+      "credentials": {
+        "clickUpApi": {
+          "id": "yevoWmWBimrH8eXR",
+          "name": "ClickUp account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Get a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cohere Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response1": {
+      "main": [
+        [
+          {
+            "node": "Send a message2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Create a task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message2": {
+      "main": [
+        [
+          {
+            "node": "Update a row1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Update a row2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a row": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a task": {
+      "main": [
+        [
+          {
+            "node": "Send message and wait for response1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e9d44d9e-5317-47b0-afd6-534efacdf1fb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a24907df917792143f061d48f72cc1cc760ff51f62e908adb6057147ba7e8e30"
+  },
+  "nodeGroups": [],
+  "id": "rqmt6PpbTkn6QRr3",
+  "tags": []
+}
