@@ -40,3 +40,23 @@ ClickUp Task                  Rejection Email
 HR Email Notification        Update Candidate Status
    ↓
 HR Decision
+
+
+
+| Component                             | Role                                                  |
+| ------------------------------------- | ----------------------------------------------------- |
+| **n8n**                               | Workflow orchestration and candidate application form |
+| **Cohere (`command-r-plus-08-2024`)** | Language model powering the AI Agent                  |
+| **Supabase (PostgreSQL)**             | Stores job requirements and candidate applications    |
+| **ClickUp**                           | Recruitment task management and team collaboration    |
+| **Gmail**                             | HR notifications and candidate rejection emails       |
+
+## Data Model
+# job_requirements: id (PK), title, description
+
+# User_job_applications: id (PK), fname, email, score, summary, status, links, language, education, skills, courses, experience, job_id (FK → job_requirements.id)
+
+## Key Design Decisions
+Dynamic job requirements: requirements live in a database table and are injected into the prompt, so the same workflow serves any vacancy without editing the AI prompt.
+Relational integrity: every application carries a job_id, so candidates are always evaluated and reported against the right position.
+Send vs. Send-and-Wait: HR emails wait for a response (accept / reject buttons); candidate rejection emails send directly, so the workflow never hangs waiting on a candidate.
