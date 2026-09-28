@@ -18,18 +18,9 @@ This project addresses these challenges by:
 An n8n automation that screens CVs with AI, scores candidates against the requirements of the job they applied for, and routes each application to the right next step: an interactive email and a ClickUp task for the HR team, or an automated rejection email to the candidate.
 
 ---
+![Job Application Flexible JD](image/Job-Application-Flexible-JD.png)
 
-## Business Overview
-
-Reviewing hundreds of CVs by hand is slow, inconsistent, and easy to get wrong. Strong candidates are lost to slow replies, and candidate data ends up scattered across inboxes and files.
-
-This project addresses that by:
-
-- **Cutting time-to-hire:** every application is read, scored, and summarized automatically.
-- **Making evaluation consistent:** each CV is scored against the actual requirements of the targeted job, which reduces human error and unconscious bias.
-- **Speeding up decisions:** the HR manager receives a candidate summary with accept / schedule-interview buttons directly in the email.
-- **Keeping one source of truth:** all candidate data and evaluations are stored in one database, organized by job.
-- **Supporting teamwork:** ClickUp tasks let several recruiters track the same candidate, so nothing stalls if one person is unavailable.
+![New Qualified Candidate](image/New-Qualified-Candidate.png)
 
 ## How It Works
 
