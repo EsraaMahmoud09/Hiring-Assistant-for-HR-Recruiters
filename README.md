@@ -17,9 +17,7 @@ This project addresses these challenges by:
 
 ---
 ![Job Application Flexible JD](image/Job-Application-Flexible-JD.png)
-
 ![New Qualified Candidate](image/New-Qualified-Candidate.png)
-
 
 ## How It Works
 
