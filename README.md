@@ -13,14 +13,13 @@ This project addresses these challenges by:
 - **Faster decisions:** The HR manager receives a candidate summary with **Accept / Schedule Interview** actions directly in the email.
 - **One source of truth:** Candidate data and evaluation results are stored in a centralized database and organized by job.
 - **Team collaboration:** ClickUp tasks allow multiple recruiters to track candidates and ensure that applications do not stall when one recruiter is unavailable.
-# Hiring Assistant for HR & Recruiters
 
-An n8n automation that screens CVs with AI, scores candidates against the requirements of the job they applied for, and routes each application to the right next step: an interactive email and a ClickUp task for the HR team, or an automated rejection email to the candidate.
 
 ---
 ![Job Application Flexible JD](image/Job-Application-Flexible-JD.png)
 
 ![New Qualified Candidate](image/New-Qualified-Candidate.png)
+
 
 ## How It Works
 
